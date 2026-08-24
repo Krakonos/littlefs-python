@@ -15,6 +15,14 @@ littlefs module
    :members:
    :undoc-members:
 
+littlefs.path module
+====================
+
+.. automodule:: littlefs.path
+   :members:
+   :undoc-members:
+   :special-members: __open_reader__, __open_writer__, __vfspath__
+
 littlefs.context module
 =======================
 
