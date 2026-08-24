@@ -47,6 +47,10 @@ setup(
     },
     install_requires=[
         "importlib-metadata>=4.4; python_version < '3.10'",
+        # Provides the pathlib ABCs backing littlefs.path / LittleFS.root.
+        # pathlib-abc itself requires Python 3.9+, so the pathlib-style API is
+        # unavailable on 3.8.
+        "pathlib-abc>=0.5.2; python_version >= '3.9'",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

@@ -33,6 +33,7 @@ __all__ = [
     "LFSStat",
     "LittleFS",
     "LittleFSError",
+    "LittleFSPath",
     "UserContext",
     "UserContextFile",
     "UserContextWinDisk",
@@ -53,6 +54,17 @@ from .context import UserContext, UserContextFile, UserContextWinDisk
 
 if TYPE_CHECKING:
     from .lfs import LFSStat
+    from .path import LittleFSPath
+
+
+def __getattr__(name: str):
+    # ``littlefs.path`` needs the optional ``pathlib-abc`` dependency, so it is
+    # imported lazily: ``import littlefs`` must keep working without it.
+    if name == "LittleFSPath":
+        from .path import LittleFSPath
+
+        return LittleFSPath
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class LittleFS:
@@ -104,6 +116,22 @@ class LittleFS:
         """User context of the file system"""
         return self.cfg.user_context
 
+    @property
+    def root(self) -> "LittleFSPath":
+        """The filesystem root (``/``) as a :class:`littlefs.path.LittleFSPath`.
+
+        This is the entry point to the ``pathlib``-style API; every path derived
+        from it stays bound to this filesystem::
+
+            (fs.root / "logs").mkdir()
+            (fs.root / "logs" / "boot.txt").write_text("ready\\n")
+
+        Requires the optional ``pathlib-abc`` dependency (Python 3.9+).
+        """
+        from .path import LittleFSPath
+
+        return LittleFSPath("/", fs=self)
+
     def format(self) -> int:
         """Format the underlying buffer"""
         if self.cfg.block_count == 0:
@@ -144,7 +172,13 @@ class LittleFS:
         return lfs.fs_gc(self.fs)
 
     def open(
-        self, fname: str, mode="r", buffering: int = -1, encoding: str = None, errors: str = None, newline: str = None
+        self,
+        fname: str,
+        mode="r",
+        buffering: int = -1,
+        encoding: Optional[str] = None,
+        errors: Optional[str] = None,
+        newline: Optional[str] = None,
     ) -> IO:
         """Open a file.
 
