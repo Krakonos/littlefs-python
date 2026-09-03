@@ -3,7 +3,7 @@ import pytest
 
 pytest.importorskip("pathlib_abc", reason="the pathlib-style API requires pathlib-abc (Python 3.9+)")
 
-from littlefs import LittleFS  # noqa: E402
+from littlefs import LittleFS, LittleFSPath  # noqa: E402
 from littlefs.errors import LittleFSError  # noqa: E402
 from littlefs.lfs import LFSStat  # noqa: E402
 
@@ -304,16 +304,13 @@ def test_info_is_cached_but_exists_is_fresh(root):
     # itself always perform a fresh lookup.
     path = root / "later.txt"
     info = path.info
+    assert path.info is info  # one info object per path
     assert not info.exists()
     path.write_text("x")
     assert not info.exists()  # still the cached answer
     assert path.exists()  # fresh lookup
     assert path.is_file()
     assert root.joinpath("later.txt").info.exists()  # a fresh path, fresh info
-
-
-def test_info_is_the_same_object(root):
-    assert root.info is root.info
 
 
 # -- glob / rglob / walk --------------------------------------------------------
@@ -356,31 +353,26 @@ def test_glob_absolute_pattern_is_rejected(tree):
         list(tree.glob("/*.txt"))
 
 
-@pytest.mark.parametrize("pattern", ["*", "**/*", "*.txt"])
-def test_glob_on_a_file_yields_nothing(root, pattern):
-    # Like pathlib, globbing something that is not a listable directory yields
+@pytest.mark.parametrize(
+    "traverse",
+    [
+        lambda path: path.glob("*"),
+        lambda path: path.glob("**/*"),
+        lambda path: path.glob("*.txt"),
+        lambda path: path.rglob("*"),
+        lambda path: path.walk(),
+    ],
+    ids=["glob", "glob-recursive", "glob-pattern", "rglob", "walk"],
+)
+def test_traversing_a_non_directory_yields_nothing(root, traverse):
+    # Like pathlib, traversing something that is not a listable directory yields
     # nothing rather than raising. This only works because iterdir() raises
-    # OSError subclasses, which the ABC's globber catches.
-    path = root / "file.txt"
-    path.write_text("x")
-    assert list(path.glob(pattern)) == []
+    # OSError subclasses, which the ABC's globber and walk() catch.
+    a_file = root / "file.txt"
+    a_file.write_text("x")
 
-
-@pytest.mark.parametrize("pattern", ["*", "**/*", "*.txt"])
-def test_glob_on_a_missing_directory_yields_nothing(root, pattern):
-    assert list((root / "nope").glob(pattern)) == []
-
-
-def test_rglob_on_a_file_yields_nothing(root):
-    path = root / "file.txt"
-    path.write_text("x")
-    assert list(path.rglob("*")) == []
-
-
-def test_walk_on_a_file_yields_nothing(root):
-    path = root / "file.txt"
-    path.write_text("x")
-    assert list(path.walk()) == []
+    assert list(traverse(a_file)) == []
+    assert list(traverse(root / "missing")) == []
 
 
 def test_walk_on_error_callback(root):
@@ -456,8 +448,6 @@ def test_copy_into(root):
 
 
 def test_a_relative_path_reaches_the_same_file(root, fs):
-    from littlefs import LittleFSPath
-
     (root / "logs").mkdir()
     (root / "logs" / "boot.txt").write_text("ready")
     relative = LittleFSPath("logs/boot.txt", fs=fs)
@@ -470,8 +460,6 @@ def test_a_relative_path_reaches_the_same_file(root, fs):
 
 
 def test_dot_segments_are_resolved_by_littlefs(root, fs):
-    from littlefs import LittleFSPath
-
     (root / "a").mkdir()
     (root / "b.txt").write_text("b")
 
@@ -483,8 +471,6 @@ def test_dot_segments_are_resolved_by_littlefs(root, fs):
 
 
 def test_copy_onto_the_same_file_by_another_path_is_refused(root, fs):
-    from littlefs import LittleFSPath
-
     (root / "notes.txt").write_text("important")
     # Different path, same file: comparing the paths would not catch this, so
     # copy() has to resolve them.
