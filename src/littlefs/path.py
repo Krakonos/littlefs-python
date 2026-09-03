@@ -14,15 +14,14 @@ Every path derived from :attr:`LittleFS.root` stays bound to the same
 filesystem handle, so all I/O is routed through it.
 
 .. note::
-   Under the hood this module uses `pathlib-abc
-   <https://pypi.org/project/pathlib-abc/>`_ to implement a
-   :class:`pathlib.Path`-like API. Support is therefore **provisional**: that
-   package is pre-1.0 and still under discussion for inclusion in CPython's
-   :mod:`pathlib`, so this API may have to follow breaking changes in it.
+   To use this ``pathlib``-like API you need **Python 3.9 or later**. On 3.8 and
+   earlier, importing this module or accessing :attr:`LittleFS.root` raises
+   :exc:`ImportError`; the rest of littlefs-python is unaffected either way.
 
-   It is also **unavailable on Python 3.8 and earlier**, where importing this
-   module or accessing :attr:`LittleFS.root` raises :exc:`ImportError`. The rest
-   of littlefs-python is unaffected.
+   Under the hood it uses `pathlib-abc
+   <https://pypi.org/project/pathlib-abc/>`_, which is pre-1.0 and still under
+   discussion for inclusion in CPython's :mod:`pathlib`. Support is therefore
+   **provisional** and may have to follow breaking changes in it.
 """
 
 import posixpath
