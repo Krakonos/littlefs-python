@@ -1,7 +1,13 @@
 """Filesystem operations performed through :class:`littlefs.path.LittleFSPath`."""
+import sys
+
 import pytest
 
-pytest.importorskip("pathlib_abc", reason="the pathlib-style API requires pathlib-abc (Python 3.9+)")
+# Below 3.9 there is no pathlib-abc to install, so skip. From 3.9 up it is a
+# declared dependency, and importing it hard means a broken install fails the
+# run instead of quietly skipping every test in this file.
+if sys.version_info < (3, 9):
+    pytest.skip("the pathlib-style API requires pathlib-abc (Python 3.9+)", allow_module_level=True)
 
 from littlefs import LittleFS, LittleFSPath  # noqa: E402
 from littlefs.errors import LittleFSError  # noqa: E402
