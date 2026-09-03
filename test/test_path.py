@@ -20,14 +20,10 @@ def root(fs):
 
 
 def test_implements_the_abcs(root):
+    # The path ABCs are inherited; PathInfo is satisfied structurally.
     assert isinstance(root, JoinablePath)
     assert isinstance(root, ReadablePath)
     assert isinstance(root, WritablePath)
-
-
-def test_info_satisfies_the_path_info_protocol(root):
-    # PathInfo is a runtime-checkable Protocol, matched structurally rather than
-    # by inheritance, so this is what pins the conformance.
     assert isinstance(root.info, PathInfo)
 
 
