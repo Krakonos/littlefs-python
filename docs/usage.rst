@@ -53,9 +53,8 @@ Pathlib-style API
 =================
 
 .. warning::
-   This API is **provisional**. It is built on `pathlib-abc`_, a pre-1.0 backport of
-   :mod:`pathlib` ABCs that are still being discussed for inclusion in CPython, so it
-   may have to follow breaking changes in that package.
+   This API is **provisional** and may still change; see :mod:`littlefs.path`
+   for what that rests on.
 
 :attr:`~littlefs.LittleFS.root` returns the filesystem root as a
 :class:`~littlefs.path.LittleFSPath`, which behaves like a :class:`pathlib.Path`:
@@ -78,7 +77,7 @@ Every path derived from :attr:`~littlefs.LittleFS.root` -- via ``/``,
 results and so on -- stays bound to the same filesystem, so all I/O is routed through it.
 The bound handle is available as :attr:`~littlefs.path.LittleFSPath.fs`.
 
-This interface requires Python 3.9 or later, the minimum supported by `pathlib-abc`_.
+This interface requires Python 3.9 or later.
 On Python 3.8, importing :mod:`littlefs.path` or accessing
 :attr:`~littlefs.LittleFS.root` raises :exc:`ImportError`; the rest of the package is
 unaffected.
@@ -140,4 +139,3 @@ Things to be aware of, mostly consequences of what littlefs itself supports:
   ``__fspath__`` would let the ABCs' file-opening helper silently operate on the host
   filesystem instead.
 
-.. _pathlib-abc: https://pypi.org/project/pathlib-abc/

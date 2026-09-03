@@ -1,9 +1,6 @@
-"""``pathlib``-style access to a littlefs filesystem.
+"""``pathlib``-style access to a littlefs filesystem
 
-This module implements the :mod:`pathlib` ABCs (``JoinablePath`` /
-``ReadablePath`` / ``WritablePath``) from the `pathlib-abc
-<https://pypi.org/project/pathlib-abc/>`_ package, so a littlefs image can be
-navigated with the familiar :class:`pathlib.Path` API::
+A littlefs image can be navigated with the familiar :class:`pathlib.Path` API::
 
     from littlefs import LittleFS
 
@@ -17,9 +14,15 @@ Every path derived from :attr:`LittleFS.root` stays bound to the same
 filesystem handle, so all I/O is routed through it.
 
 .. note::
-   ``pathlib-abc`` is pre-1.0 and its API is still under discussion for
-   inclusion in CPython's :mod:`pathlib`. This module should be considered
-   **provisional**: it may need to follow breaking changes in ``pathlib-abc``.
+   Under the hood this module uses `pathlib-abc
+   <https://pypi.org/project/pathlib-abc/>`_ to implement a
+   :class:`pathlib.Path`-like API. Support is therefore **provisional**: that
+   package is pre-1.0 and still under discussion for inclusion in CPython's
+   :mod:`pathlib`, so this API may have to follow breaking changes in it.
+
+   It is also **unavailable on Python 3.8 and earlier**, where importing this
+   module or accessing :attr:`LittleFS.root` raises :exc:`ImportError`. The rest
+   of littlefs-python is unaffected.
 """
 
 import posixpath
@@ -83,9 +86,9 @@ def _segment_to_str(segment: _StrPath) -> str:
 class LittleFSPathInfo:
     """File type information for a :class:`LittleFSPath`.
 
-    Satisfies the ``PathInfo`` protocol from ``pathlib-abc``. One
-    :meth:`LittleFS.stat` result is fetched on first use and then **cached**, as
-    the protocol permits, which is what makes ``glob``/``walk`` cheap.
+    Satisfies the ``PathInfo`` protocol. One :meth:`LittleFS.stat` result is
+    fetched on first use and then **cached**, as the protocol permits, which is
+    what makes ``glob``/``walk`` cheap.
 
     The ``follow_symlinks`` arguments are accepted and ignored: littlefs has no
     symbolic links.
@@ -148,7 +151,7 @@ class LittleFSPath(ReadablePath, WritablePath):
 
     Pure path behaviour (``parts``, ``name``, ``stem``, ``suffix``, ``parent``,
     ``relative_to``, ``full_match``, ...) and ``glob``/``rglob``/``walk``/
-    ``copy`` come from the ``pathlib-abc`` ABCs. Everything that touches the
+    ``copy`` come from the :mod:`pathlib` ABCs. Everything that touches the
     filesystem delegates to the bound handle.
 
     littlefs resolves every path from the filesystem root, so a "relative" path

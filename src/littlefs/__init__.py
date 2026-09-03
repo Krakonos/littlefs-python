@@ -126,7 +126,7 @@ class LittleFS:
             (fs.root / "logs").mkdir()
             (fs.root / "logs" / "boot.txt").write_text("ready\\n")
 
-        Requires the optional ``pathlib-abc`` dependency (Python 3.9+).
+        Requires Python 3.9 or later; see :mod:`littlefs.path` for the caveats.
         """
         from .path import LittleFSPath
 
