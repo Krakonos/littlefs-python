@@ -59,6 +59,23 @@ steps which must be performed in C:
     with open('FlashMemory.bin', 'wb') as fh:
         fh.write(cfg.user_context.buffer)
 
+Finally, the filesystem can be navigated with a :mod:`pathlib`-style interface, rooted at
+:attr:`LittleFS.root`:
+
+.. code:: python
+
+    from littlefs import LittleFS
+
+    fs = LittleFS(block_size=512, block_count=256)
+
+    (fs.root / 'logs').mkdir()
+    (fs.root / 'logs' / 'boot.txt').write_text('ready\n')
+
+    for path in fs.root.rglob('*.txt'):
+        print(path, path.read_text())
+
+See :ref:`doc-pathlib-api` for details. This interface requires Python 3.9 or later.
+
 
 Installation
 ============
